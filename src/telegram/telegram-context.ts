@@ -18,6 +18,7 @@ type TelegramWebAppUser = {
 
 type TelegramWebApp = {
   ready?: () => void;
+  initData?: string;
   initDataUnsafe?: {
     user?: TelegramWebAppUser;
   };
@@ -63,7 +64,15 @@ export function TelegramUserProvider({ children }: { children: ReactNode }) {
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
 
   useEffect(() => {
-    setTelegramUser(getTelegramUser());
+    const user = getTelegramUser();
+    setTelegramUser(user);
+    const webApp = (window as TelegramWindow).Telegram?.WebApp;
+    if (webApp?.initData) {
+      fetch("/api/telegram/auth", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ initData: webApp.initData }) })
+        .then((response) => response.ok ? response.json() : null)
+        .then((payload) => setTelegramUser(payload?.user ?? null))
+        .catch(() => setTelegramUser(null));
+    }
   }, []);
 
   return createElement(TelegramUserContext.Provider, { value: telegramUser }, children);
