@@ -1,0 +1,4 @@
+import { NextResponse } from "next/server";
+const appUrl=()=>process.env.NEXT_PUBLIC_APP_URL||"https://superpowers-plugin-superpowers-open-two.vercel.app";
+export async function POST(request: Request) { const token=process.env.TELEGRAM_BOT_TOKEN; if(!token) return NextResponse.json({ok:false},{status:503}); const update=await request.json(); const chatId=update?.message?.chat?.id; if(chatId&&update?.message?.text?.startsWith("/start")){await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chat_id:chatId,text:"Assalomu alaykum! Bayramingiz uchun chiroyli to‘plam tanlaymiz.",reply_markup:{inline_keyboard:[[{text:"Bayramni rejalashtirish",web_app:{url:appUrl()}}]]}})});} return NextResponse.json({ok:true}); }
+
